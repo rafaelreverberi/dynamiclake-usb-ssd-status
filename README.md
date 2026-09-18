@@ -27,11 +27,11 @@ USB / SSD Status is a local, native Swift JSON plugin for DynamicLake (plugin na
 
 ## Status
 
-Version 0.1.5 is an early public release. The package, framed JSON transport, lifecycle handling, mount/unmount events, capacity reporting, and Finder-to-removable-drive presentation have been exercised on the development Mac. The broader filesystem/hardware matrix remains documented in [Testing](docs/TESTING.md).
+Version 0.1.6 is an early public release. The package, framed JSON transport, lifecycle handling, mount/unmount events, capacity reporting, and Finder-to-removable-drive presentation have been exercised on the development Mac. The broader filesystem/hardware matrix remains documented in [Testing](docs/TESTING.md).
 
 ## Installation
 
-1. Download `TransferCenter-0.1.5.dynamiclakeplugin.zip` from the [latest release](https://github.com/rafaelreverberi/dynamiclake-usb-ssd-status/releases/latest).
+1. Download `TransferCenter-0.1.6.dynamiclakeplugin.zip` from the [latest release](https://github.com/rafaelreverberi/dynamiclake-usb-ssd-status/releases/latest).
 2. Extract the ZIP archive.
 3. Open **DynamicLake → Settings → Plugins → Install Local**.
 4. Select `TransferCenter.dynamiclakeplugin`.
@@ -103,7 +103,7 @@ swift build
 swift test
 swift build -c release --arch arm64 --arch x86_64
 ./scripts/package-plugin.sh
-./scripts/check-package.sh dist/TransferCenter-0.1.5.dynamiclakeplugin.zip
+./scripts/check-package.sh dist/TransferCenter-0.1.6.dynamiclakeplugin.zip
 ```
 
 The deterministic `TransferCenter-Development.dynamiclakeplugin` package emits a synthetic transfer and dismisses itself. It is for host UI testing only, not everyday use.

@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.1.5 - 2026-09-18
+## 0.1.6 - 2026-09-18
+
+- Show completed transfers and connected drives with a plain checkmark instead of the circled status badge in the notch.
+- Failures and interruptions keep the circled status indicator.
 
 - Suppressed Foundation Progress objects that are already terminal when first published.
 - Show completion only for a transfer that previously crossed the Live Activity visibility threshold.

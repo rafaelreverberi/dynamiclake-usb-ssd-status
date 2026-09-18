@@ -164,7 +164,11 @@ public final class DynamicLakeRenderer {
         }
         let compact: [String: Any] = [
             "leftSlot": driveImage(id: "transfer-result-compact"),
-            "rightSlot": status(id: "transfer-result-status", value: transfer.state == .completed ? "success" : "failed", tint: tint),
+            // Completed transfers show a plain checkmark; the circled
+            // status badge is reserved for failures and interruptions.
+            "rightSlot": transfer.state == .completed
+                ? image(id: "transfer-result-status", symbol: "checkmark", tint: tint)
+                : status(id: "transfer-result-status", value: "failed", tint: tint),
         ]
         return base(command: command, activityID: activityID, surfaces: [
             "compactLiveActivity": compact,
@@ -186,6 +190,9 @@ public final class DynamicLakeRenderer {
         let trailing: [String: Any]
         if let rightSystemImage {
             trailing = image(id: "peek-trailing-icon", symbol: rightSystemImage, tint: rightTint ?? tint)
+        } else if statusValue == "success" {
+            // Plain checkmark without the circled status badge.
+            trailing = image(id: "peek-status", symbol: "checkmark", tint: rightTint ?? tint)
         } else {
             trailing = status(id: "peek-status", value: statusValue, tint: rightTint ?? tint)
         }

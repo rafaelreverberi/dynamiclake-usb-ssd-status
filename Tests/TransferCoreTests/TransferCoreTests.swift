@@ -218,6 +218,12 @@ final class DynamicLakeRenderingTests: XCTestCase {
         var surfaces = try XCTUnwrap(payload["surfaces"] as? [String: Any])
         var sneak = try XCTUnwrap(surfaces["sneakPeek"] as? [String: Any])
         XCTAssertNotNil(sneak["rightSlot"])
+        var compact = try XCTUnwrap(surfaces["compactLiveActivity"] as? [String: Any])
+        var compactRight = try XCTUnwrap(compact["rightSlot"] as? [String: Any])
+        XCTAssertEqual(compactRight["type"] as? String, "image")
+        XCTAssertEqual(compactRight["systemImage"] as? String, "checkmark")
+        XCTAssertEqual(compactRight["tint"] as? String, "green")
+        XCTAssertNil(compactRight["status"], "Completed transfers show a plain checkmark, not a circled status badge")
 
         transfer.state = .failed
         payload = DynamicLakeRenderer.terminalPayload(transfer: transfer, command: "update", canEject: false)
@@ -225,6 +231,10 @@ final class DynamicLakeRenderingTests: XCTestCase {
         sneak = try XCTUnwrap(surfaces["sneakPeek"] as? [String: Any])
         XCTAssertNil(sneak["rightSlot"])
         XCTAssertNil(payload["presentSneakPeek"], "Feature-gated fields must be omitted for older hosts")
+        compact = try XCTUnwrap(surfaces["compactLiveActivity"] as? [String: Any])
+        compactRight = try XCTUnwrap(compact["rightSlot"] as? [String: Any])
+        XCTAssertEqual(compactRight["type"] as? String, "status")
+        XCTAssertEqual(compactRight["status"] as? String, "failed")
     }
 
     func testDisconnectedVolumePeekUsesNeutralXmarkAndIsFeatureGated() throws {
@@ -254,6 +264,12 @@ final class DynamicLakeRenderingTests: XCTestCase {
             systemImage: "externaldrive.fill"
         )
         XCTAssertNil(compatible["presentSneakPeek"])
+        let compatibleSurfaces = try XCTUnwrap(compatible["surfaces"] as? [String: Any])
+        let compatibleCompact = try XCTUnwrap(compatibleSurfaces["compactLiveActivity"] as? [String: Any])
+        let compatibleRight = try XCTUnwrap(compatibleCompact["rightSlot"] as? [String: Any])
+        XCTAssertEqual(compatibleRight["type"] as? String, "image")
+        XCTAssertEqual(compatibleRight["systemImage"] as? String, "checkmark")
+        XCTAssertNil(compatibleRight["status"], "Connected drives show a plain checkmark, not a circled status badge")
     }
 
     func testCompletionIsEligibleOnlyAfterThatTransferWasPresented() {

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "identifier": "com.rafaelreverberi.plugins.transfer-center",
   "name": "Transfer Center",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "developerName": "Rafael Reverberi",
   "description": "Shows file-transfer activity for external drives in DynamicLake.",
   "executable": "transfer-center",
