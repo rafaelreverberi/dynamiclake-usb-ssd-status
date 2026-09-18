@@ -7,6 +7,8 @@ public final class DynamicLakeRenderer {
     private let minimumUpdateInterval: TimeInterval = 0.25
     private var firstSeen: [String: Date] = [:]
     private var presentedTransferIDs: Set<String> = []
+    private var animatedTerminalIDs: Set<String> = []
+    private var pendingCompletionAnimations: [String: DispatchWorkItem] = [:]
     private var lastPayloadSignature: String?
     private var lastSentAt = Date.distantPast
     private var published = false
@@ -27,12 +29,14 @@ public final class DynamicLakeRenderer {
         dispatchPrecondition(condition: .onQueue(.main))
         let active = transfers.filter(\.state.isActive)
         presentedTransferIDs.formIntersection(Set(transfers.map(\.id)))
+        animatedTerminalIDs.formIntersection(Set(transfers.map(\.id)))
         for transfer in active where firstSeen[transfer.id] == nil { firstSeen[transfer.id] = Date() }
         firstSeen = firstSeen.filter { id, _ in active.contains(where: { $0.id == id }) }
 
         if let selected = selectedActive(active),
            Date().timeIntervalSince(firstSeen[selected.id] ?? Date()) >= minimumVisibleDelay {
             presentedTransferIDs.insert(selected.id)
+            cancelPendingCompletionAnimations()
             sendThrottled(Self.activePayload(transfer: selected, activeCount: active.count, command: published ? "update" : "create"))
             presentedEjectVolumeID = nil
             return
@@ -45,13 +49,42 @@ public final class DynamicLakeRenderer {
 
         if let terminal = Self.eligibleTerminal(in: transfers, presentedTransferIDs: presentedTransferIDs) {
             presentedEjectVolumeID = terminal.state == .completed ? terminal.destinationVolumeID : nil
-            sendThrottled(Self.terminalPayload(
-                transfer: terminal,
-                command: published ? "update" : "create",
-                canEject: presentedEjectVolumeID != nil,
-                supportsPresentSneakPeek: supportsPresentSneakPeek
-            ))
+            let canEject = presentedEjectVolumeID != nil
+            if terminal.state == .completed, !animatedTerminalIDs.contains(terminal.id) {
+                // Apple-Pay-style two-phase success: empty green circle first,
+                // then the checkmark draws in. Only for successful file transfers.
+                animatedTerminalIDs.insert(terminal.id)
+                cancelPendingCompletionAnimations()
+                sendThrottled(Self.terminalPayload(
+                    transfer: terminal,
+                    command: published ? "update" : "create",
+                    canEject: canEject,
+                    supportsPresentSneakPeek: supportsPresentSneakPeek,
+                    showCompletionCheck: false
+                ))
+                let final = Self.terminalPayload(
+                    transfer: terminal,
+                    command: "update",
+                    canEject: canEject,
+                    supportsPresentSneakPeek: false,
+                    showCompletionCheck: true
+                )
+                let work = DispatchWorkItem { [weak self] in
+                    self?.pendingCompletionAnimations.removeValue(forKey: terminal.id)
+                    self?.sendThrottled(final)
+                }
+                pendingCompletionAnimations[terminal.id] = work
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: work)
+            } else {
+                sendThrottled(Self.terminalPayload(
+                    transfer: terminal,
+                    command: published ? "update" : "create",
+                    canEject: canEject,
+                    supportsPresentSneakPeek: supportsPresentSneakPeek
+                ))
+            }
         } else if published {
+            cancelPendingCompletionAnimations()
             trySend(Self.dismissPayload(activityID: Self.activityID))
             published = false
             lastPayloadSignature = nil
@@ -139,13 +172,14 @@ public final class DynamicLakeRenderer {
         transfer: Transfer,
         command: String,
         canEject: Bool,
-        supportsPresentSneakPeek: Bool = false
+        supportsPresentSneakPeek: Bool = false,
+        showCompletionCheck: Bool = true
     ) -> [String: Any] {
         let title: String
         let symbol: String
         let tint: String
         switch transfer.state {
-        case .completed: title = "Transfer complete"; symbol = "checkmark.circle.fill"; tint = "green"
+        case .completed: title = "Transfer complete"; symbol = showCompletionCheck ? "checkmark.circle" : "circle"; tint = "green"
         case .cancelled: title = "Transfer cancelled"; symbol = "xmark.circle.fill"; tint = "orange"
         case .volumeDisconnected: title = "Drive disconnected · Transfer interrupted"; symbol = "externaldrive.badge.exclamationmark"; tint = "red"
         default: title = transfer.failureDescription ?? "Transfer failed"; symbol = "exclamationmark.triangle.fill"; tint = "red"
@@ -164,10 +198,10 @@ public final class DynamicLakeRenderer {
         }
         let compact: [String: Any] = [
             "leftSlot": driveImage(id: "transfer-result-compact"),
-            // Completed transfers show a plain checkmark; the circled
-            // status badge is reserved for failures and interruptions.
+            // Completed transfers show an outline circle with a checkmark;
+            // the filled status badge is reserved for failures and interruptions.
             "rightSlot": transfer.state == .completed
-                ? image(id: "transfer-result-status", symbol: "checkmark", tint: tint)
+                ? image(id: "transfer-result-status", symbol: showCompletionCheck ? "checkmark.circle" : "circle", tint: tint)
                 : status(id: "transfer-result-status", value: "failed", tint: tint),
         ]
         return base(command: command, activityID: activityID, surfaces: [
@@ -224,6 +258,11 @@ public final class DynamicLakeRenderer {
             if $0.provider.priority != $1.provider.priority { return $0.provider.priority < $1.provider.priority }
             return $0.updatedAt < $1.updatedAt
         }
+    }
+
+    private func cancelPendingCompletionAnimations() {
+        pendingCompletionAnimations.values.forEach { $0.cancel() }
+        pendingCompletionAnimations.removeAll()
     }
 
     private func scheduleRefresh(_ transfers: [Transfer]) {

@@ -221,9 +221,24 @@ final class DynamicLakeRenderingTests: XCTestCase {
         var compact = try XCTUnwrap(surfaces["compactLiveActivity"] as? [String: Any])
         var compactRight = try XCTUnwrap(compact["rightSlot"] as? [String: Any])
         XCTAssertEqual(compactRight["type"] as? String, "image")
-        XCTAssertEqual(compactRight["systemImage"] as? String, "checkmark")
+        XCTAssertEqual(compactRight["systemImage"] as? String, "checkmark.circle")
         XCTAssertEqual(compactRight["tint"] as? String, "green")
-        XCTAssertNil(compactRight["status"], "Completed transfers show a plain checkmark, not a circled status badge")
+        XCTAssertNil(compactRight["status"], "Completed transfers show an outline circle with a checkmark, not a filled status badge")
+        let sneakLeft = try XCTUnwrap(sneak["leftSlot"] as? [String: Any])
+        XCTAssertEqual(sneakLeft["systemImage"] as? String, "checkmark.circle")
+
+        let firstPhase = DynamicLakeRenderer.terminalPayload(
+            transfer: transfer,
+            command: "create",
+            canEject: false,
+            showCompletionCheck: false
+        )
+        let firstSurfaces = try XCTUnwrap(firstPhase["surfaces"] as? [String: Any])
+        let firstCompact = try XCTUnwrap(firstSurfaces["compactLiveActivity"] as? [String: Any])
+        let firstRight = try XCTUnwrap(firstCompact["rightSlot"] as? [String: Any])
+        XCTAssertEqual(firstRight["type"] as? String, "image")
+        XCTAssertEqual(firstRight["systemImage"] as? String, "circle")
+        XCTAssertEqual(firstRight["tint"] as? String, "green")
 
         transfer.state = .failed
         payload = DynamicLakeRenderer.terminalPayload(transfer: transfer, command: "update", canEject: false)
