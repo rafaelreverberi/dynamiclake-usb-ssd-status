@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_dir="${0:A:h:h}"
-target="${1:-$repo_dir/TransferCenter.dynamiclakeplugin}"
+target="${1:-$repo_dir/USB-SSD-Status.dynamiclakeplugin}"
 work_dir=""
 
 if [[ "$target" == *.zip ]]; then
@@ -10,7 +10,7 @@ if [[ "$target" == *.zip ]]; then
     print -u2 "Archive contains Finder or AppleDouble metadata."
     exit 1
   fi
-  work_dir="$(mktemp -d -t transfer-center-package-check)"
+  work_dir="$(mktemp -d -t usb-ssd-status-package-check)"
   trap 'rm -rf "$work_dir"' EXIT
   ditto -x -k "$target" "$work_dir"
   packages=("$work_dir"/*.dynamiclakeplugin(N))

@@ -11,7 +11,7 @@ See file transfers to USB drives, external SSDs, and other removable storage dir
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black)](https://www.apple.com/macos/)
 
-USB / SSD Status is a local, native Swift JSON plugin for DynamicLake (plugin name: Transfer Center). It combines public macOS progress publications with low-cost filesystem activity and an optional Finder Accessibility fallback. Unknown values remain hidden: the plugin never invents percentages, byte counts, speeds, or ETAs.
+USB / SSD Status is a local, native Swift JSON plugin for DynamicLake. It combines public macOS progress publications with low-cost filesystem activity and an optional Finder Accessibility fallback. Unknown values remain hidden: the plugin never invents percentages, byte counts, speeds, or ETAs.
 
 ## Features
 
@@ -27,14 +27,14 @@ USB / SSD Status is a local, native Swift JSON plugin for DynamicLake (plugin na
 
 ## Status
 
-Version 0.1.7 is an early public release. The package, framed JSON transport, lifecycle handling, mount/unmount events, capacity reporting, and Finder-to-removable-drive presentation have been exercised on the development Mac. The broader filesystem/hardware matrix remains documented in [Testing](docs/TESTING.md).
+Version 0.1.8 is an early public release. The package, framed JSON transport, lifecycle handling, mount/unmount events, capacity reporting, and Finder-to-removable-drive presentation have been exercised on the development Mac. The broader filesystem/hardware matrix remains documented in [Testing](docs/TESTING.md).
 
 ## Installation
 
-1. Download `TransferCenter-0.1.7.dynamiclakeplugin.zip` from the [latest release](https://github.com/rafaelreverberi/dynamiclake-usb-ssd-status/releases/latest).
+1. Download `USB-SSD-Status-0.1.8.dynamiclakeplugin.zip` from the [latest release](https://github.com/rafaelreverberi/dynamiclake-usb-ssd-status/releases/latest).
 2. Extract the ZIP archive.
 3. Open **DynamicLake → Settings → Plugins → Install Local**.
-4. Select `TransferCenter.dynamiclakeplugin`.
+4. Select `USB-SSD-Status.dynamiclakeplugin`.
 5. Leave **Finder Accessibility Fallback** disabled unless the normal providers are insufficient on your Mac.
 
 DynamicLake manages the installed copy. Do not modify files inside the installed package; install a newer release when updating.
@@ -64,7 +64,7 @@ See [Architecture](docs/ARCHITECTURE.md) and [Foundation Progress findings](docs
 
 Normal operation requires no root access, sudo, kernel extension, Full Disk Access, or Accessibility permission.
 
-Accessibility is optional and used only by the Finder fallback. The plugin never opens System Settings or prompts for that permission automatically. If enabled, grant access to the installed `transfer-center` executable and restart the plugin.
+Accessibility is optional and used only by the Finder fallback. The plugin never opens System Settings or prompts for that permission automatically. If enabled, grant access to the installed `usb-ssd-status` executable and restart the plugin.
 
 ## Privacy and security
 
@@ -103,21 +103,21 @@ swift build
 swift test
 swift build -c release --arch arm64 --arch x86_64
 ./scripts/package-plugin.sh
-./scripts/check-package.sh dist/TransferCenter-0.1.7.dynamiclakeplugin.zip
+./scripts/check-package.sh dist/USB-SSD-Status-0.1.8.dynamiclakeplugin.zip
 ```
 
-The deterministic `TransferCenter-Development.dynamiclakeplugin` package emits a synthetic transfer and dismisses itself. It is for host UI testing only, not everyday use.
+The deterministic `USB-SSD-Status-Development.dynamiclakeplugin` package emits a synthetic transfer and dismisses itself. It is for host UI testing only, not everyday use.
 
 ## Diagnostics
 
 ```sh
-swift run transfer-center --list-volumes
-swift run transfer-center --diagnostics
-swift run transfer-center --demo-json
+swift run usb-ssd-status --list-volumes
+swift run usb-ssd-status --diagnostics
+swift run usb-ssd-status --demo-json
 ./scripts/run-progress-probe.sh
 ```
 
-Add `--debug` for bounded local diagnostics. Logs are written to `~/Library/Application Support/DynamicLake/PluginLogs/transfer-center-debug.log`.
+Add `--debug` for bounded local diagnostics. Logs are written to `~/Library/Application Support/DynamicLake/PluginLogs/usb-ssd-status-debug.log`.
 
 ## Release verification
 

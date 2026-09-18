@@ -30,10 +30,10 @@ def send_frame(connection: socket.socket, value: dict) -> None:
 
 
 def main() -> int:
-    binary = Path(sys.argv[1] if len(sys.argv) > 1 else ".build/release/transfer-center").resolve()
+    binary = Path(sys.argv[1] if len(sys.argv) > 1 else ".build/release/usb-ssd-status").resolve()
     if not binary.is_file():
         raise SystemExit(f"missing binary: {binary}")
-    with tempfile.TemporaryDirectory(prefix="transfer-center-smoke-") as directory:
+    with tempfile.TemporaryDirectory(prefix="usb-ssd-status-smoke-") as directory:
         path = str(Path(directory) / "dynamiclake.sock")
         server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         server.bind(path)
@@ -48,7 +48,7 @@ def main() -> int:
             connection.settimeout(5)
             first = read_frame(connection)
             assert first["type"] == "create"
-            assert first["activityID"] == "transfer-center.active"
+            assert first["activityID"] == "usb-ssd-status.active"
             assert "compactLiveActivity" in first["surfaces"]
             send_frame(connection, {"type": "response", "ok": True, "requestID": first.get("requestID")})
             completion = None
@@ -62,7 +62,7 @@ def main() -> int:
             assert completion is not None, "completion update with presentSneakPeek was not received"
             dismissed = read_frame(connection)
             assert dismissed["type"] == "dismiss"
-            assert dismissed["activityID"] == "transfer-center.active"
+            assert dismissed["activityID"] == "usb-ssd-status.active"
             send_frame(connection, {"type": "response", "ok": True, "requestID": dismissed.get("requestID")})
             print("Socket smoke test passed: create, completion, and idle dismissal frames decoded.")
             connection.close()

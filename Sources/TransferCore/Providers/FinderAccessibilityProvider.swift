@@ -39,7 +39,7 @@ public final class FinderAccessibilityProvider: TransferProvider {
             return
         }
         guard Self.isPermissionGranted else {
-            diagnostic = "Accessibility permission is not granted. Transfer Center will continue with Foundation Progress and FSEvents."
+            diagnostic = "Accessibility permission is not granted. USB / SSD Status will continue with Foundation Progress and FSEvents."
             Logger.shared.warning(diagnostic)
             return
         }

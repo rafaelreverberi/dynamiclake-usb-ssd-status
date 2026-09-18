@@ -19,16 +19,16 @@ jobs:
       - name: Test
         run: swift test
       - name: Release build
-        run: swift build -c release --arch arm64 --arch x86_64 --product transfer-center
+        run: swift build -c release --arch arm64 --arch x86_64 --product usb-ssd-status
       - name: Package
         run: ./scripts/package-plugin.sh
       - name: Validate package
         run: |
-          ./scripts/check-package.sh TransferCenter.dynamiclakeplugin
-          ./scripts/check-package.sh "dist/TransferCenter-$(jq -r .version plugin.json).dynamiclakeplugin.zip"
+          ./scripts/check-package.sh USB-SSD-Status.dynamiclakeplugin
+          ./scripts/check-package.sh "dist/USB-SSD-Status-$(jq -r .version plugin.json).dynamiclakeplugin.zip"
       - name: Socket protocol smoke test
-        run: ./scripts/socket-smoke.py "$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/transfer-center"
+        run: ./scripts/socket-smoke.py "$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/usb-ssd-status"
       - uses: actions/upload-artifact@v4
         with:
-          name: TransferCenter-dynamiclakeplugin
+          name: USB-SSD-Status-dynamiclakeplugin
           path: dist/*.dynamiclakeplugin.zip

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.8 - 2026-09-18
+
+- Renamed the plugin from `Transfer Center` to `USB / SSD Status` everywhere: display name, identifier (`com.rafaelreverberi.plugins.usb-ssd-status`), executable (`usb-ssd-status`), packages (`USB-SSD-Status(.‑Development).dynamiclakeplugin`), and release archives (`USB-SSD-Status-<version>.dynamiclakeplugin.zip`).
+- Note: DynamicLake treats the renamed plugin as a new plugin. Remove the old `Transfer Center` entry after installing 0.1.8.
+
 ## 0.1.7 - 2026-09-18
 
 - Fixed the center flashing `success` multiple times during multi-file copies. Sequential per-file Foundation Progress objects on the same volume now continue one logical transfer, so completion appears once at the end.

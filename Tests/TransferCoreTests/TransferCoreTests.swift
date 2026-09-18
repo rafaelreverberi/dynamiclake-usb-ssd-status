@@ -276,7 +276,7 @@ final class DynamicLakeRenderingTests: XCTestCase {
 
     func testDisconnectedVolumePeekUsesNeutralXmarkAndIsFeatureGated() throws {
         let payload = DynamicLakeRenderer.peekPayload(
-            activityID: "transfer-center.volume-event",
+            activityID: "usb-ssd-status.volume-event",
             text: "Backup SSD disconnected",
             systemImage: "externaldrive.fill",
             useDriveArtwork: true,
@@ -296,7 +296,7 @@ final class DynamicLakeRenderingTests: XCTestCase {
         XCTAssertEqual(right["tint"] as? String, "gray")
 
         let compatible = DynamicLakeRenderer.peekPayload(
-            activityID: "transfer-center.volume-event",
+            activityID: "usb-ssd-status.volume-event",
             text: "Backup SSD connected",
             systemImage: "externaldrive.fill"
         )

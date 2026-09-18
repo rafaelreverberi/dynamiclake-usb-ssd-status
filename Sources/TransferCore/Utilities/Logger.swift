@@ -3,7 +3,7 @@ import Foundation
 public final class Logger {
     public static let shared = Logger()
     public var isDebugEnabled = false
-    private let queue = DispatchQueue(label: "com.rafaelreverberi.transfer-center.logger")
+    private let queue = DispatchQueue(label: "com.rafaelreverberi.usb-ssd-status.logger")
     private let formatter = ISO8601DateFormatter()
 
     private init() {}
@@ -17,7 +17,7 @@ public final class Logger {
 
     public var logURL: URL {
         let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return root.appendingPathComponent("DynamicLake/PluginLogs/transfer-center-debug.log")
+        return root.appendingPathComponent("DynamicLake/PluginLogs/usb-ssd-status-debug.log")
     }
 
     private func write(_ level: String, _ message: String) {

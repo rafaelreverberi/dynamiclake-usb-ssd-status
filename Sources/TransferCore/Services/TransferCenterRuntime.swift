@@ -47,7 +47,7 @@ public final class TransferCenterRuntime {
         foundationProvider.start(volumes: monitor.volumes)
         fseventsProvider.start(volumes: monitor.volumes)
         finderProvider.start(volumes: monitor.volumes)
-        Logger.shared.info("Transfer Center started with \(monitor.volumes.filter(\.isRelevantExternal).count) external volume(s)")
+        Logger.shared.info("USB / SSD Status started with \(monitor.volumes.filter(\.isRelevantExternal).count) external volume(s)")
     }
 
     public func stop() {

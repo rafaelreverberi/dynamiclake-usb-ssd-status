@@ -1,7 +1,7 @@
 import Foundation
 
 public final class DynamicLakeRenderer {
-    public static let activityID = "transfer-center.active"
+    public static let activityID = "usb-ssd-status.active"
     private let bridge: DynamicLakeBridge
     private let minimumVisibleDelay: TimeInterval = 0.75
     private let minimumUpdateInterval: TimeInterval = 0.25
@@ -63,7 +63,7 @@ public final class DynamicLakeRenderer {
         var details = "\(volume.name) connected"
         if let free = TransferFormatters.bytes(volume.availableCapacity) { details += " · \(free) free" }
         showTransientPeek(
-            activityID: "transfer-center.volume-event",
+            activityID: "usb-ssd-status.volume-event",
             text: details,
             systemImage: "externaldrive.fill",
             useDriveArtwork: true,
@@ -75,7 +75,7 @@ public final class DynamicLakeRenderer {
 
     public func showUnmounted(_ volume: Volume) {
         showTransientPeek(
-            activityID: "transfer-center.volume-event",
+            activityID: "usb-ssd-status.volume-event",
             text: "\(volume.name) disconnected",
             systemImage: "externaldrive.fill",
             useDriveArtwork: true,
@@ -104,7 +104,7 @@ public final class DynamicLakeRenderer {
             tint = "red"
         }
         showTransientPeek(
-            activityID: "transfer-center.eject-result",
+            activityID: "usb-ssd-status.eject-result",
             text: text,
             systemImage: symbol,
             status: statusValue,
@@ -294,7 +294,7 @@ public final class DynamicLakeRenderer {
             "requestID": UUID().uuidString,
             "type": command,
             "activityID": activityID,
-            "title": "Transfer Center",
+            "title": "USB / SSD Status",
             "priority": "normal",
             "size": "small",
             "surfaces": surfaces,

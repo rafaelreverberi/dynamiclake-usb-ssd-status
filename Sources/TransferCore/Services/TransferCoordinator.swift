@@ -5,7 +5,7 @@ public final class TransferCoordinator: TransferProviderDelegate {
     public private(set) var transfers: [String: Transfer] = [:]
 
     private var aliases: [String: String] = [:]
-    private let queue = DispatchQueue(label: "com.rafaelreverberi.transfer-center.coordinator")
+    private let queue = DispatchQueue(label: "com.rafaelreverberi.usb-ssd-status.coordinator")
     /// Finder publishes one Progress object per file for folder copies. Without
     /// coalescing, each file completion would flash `Transfer complete` before
     /// the next file starts. A new Foundation transfer on the same volume

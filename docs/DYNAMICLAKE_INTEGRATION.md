@@ -15,20 +15,20 @@ The implementation follows the current official DocC schema and also verifies fr
 
 ## Why a Plugin
 
-DynamicLake's official SDK README says JSON plugins send predefined JSON components and do not need DynamicLakeKit. Extensions use ExtensionKit and DynamicLakeKit when they need fully custom SwiftUI rendering. Transfer Center only needs documented native components, so a JSON Plugin is the lighter valid architecture.
+DynamicLake's official SDK README says JSON plugins send predefined JSON components and do not need DynamicLakeKit. Extensions use ExtensionKit and DynamicLakeKit when they need fully custom SwiftUI rendering. USB / SSD Status only needs documented native components, so a JSON Plugin is the lighter valid architecture.
 
 ## Package structure
 
 ```text
-TransferCenter.dynamiclakeplugin/
+USB-SSD-Status.dynamiclakeplugin/
 ├── plugin.json
-├── transfer-center        # executable Mach-O
+├── usb-ssd-status        # executable Mach-O
 ├── icon.png               # square PNG
 ├── drive-transfer-symbol.png # 96 px transparent inline activity artwork
 └── PrivacyInfo.xcprivacy
 ```
 
-The Market archive preserves this package directory as the single archive root: `TransferCenter-0.1.7.dynamiclakeplugin.zip`.
+The Market archive preserves this package directory as the single archive root: `USB-SSD-Status-0.1.8.dynamiclakeplugin.zip`.
 
 ## plugin.json
 
@@ -102,14 +102,14 @@ Each component in this project has a stable `id`.
 
 ## Host compatibility findings
 
-Transfer Center conservatively normalizes Sneak Peek center text to one line and truncates it at 240 characters, matching the installed official plugin behavior observed during compatibility testing. It reads host `response` frames and logs rejection details rather than treating a successful socket write as host acceptance.
+USB / SSD Status conservatively normalizes Sneak Peek center text to one line and truncates it at 240 characters, matching the installed official plugin behavior observed during compatibility testing. It reads host `response` frames and logs rejection details rather than treating a successful socket write as host acceptance.
 
 ## Install and test workflow
 
 1. Run `./scripts/build-release.sh`.
 2. DynamicLake → Settings → Plugins → Install Local.
-3. Select `TransferCenter.dynamiclakeplugin`.
-4. For a deterministic host UI check, install `TransferCenter-Development.dynamiclakeplugin` instead; it launches with `--mock-transfer`, shows start/completion, and dismisses itself. The production package has no mock arguments.
+3. Select `USB-SSD-Status.dynamiclakeplugin`.
+4. For a deterministic host UI check, install `USB-SSD-Status-Development.dynamiclakeplugin` instead; it launches with `--mock-transfer`, shows start/completion, and dismisses itself. The production package has no mock arguments.
 5. For socket-only validation, run `scripts/socket-smoke.py` against the Release binary.
 
 The development package proves package launch, framing, schema acceptance, and rendering. It does not prove Finder or hardware transfer detection.

@@ -6,7 +6,7 @@ let package = Package(
     platforms: [.macOS(.v13)],
     products: [
         .library(name: "TransferCore", targets: ["TransferCore"]),
-        .executable(name: "transfer-center", targets: ["TransferCenter"]),
+        .executable(name: "usb-ssd-status", targets: ["TransferCenter"]),
         .executable(name: "transfer-probe", targets: ["TransferProbe"]),
     ],
     targets: [

@@ -18,7 +18,7 @@ Please include:
 1. Steps to reproduce.
 2. Expected behavior.
 3. Actual behavior.
-4. Relevant lines from `~/Library/Application Support/DynamicLake/PluginLogs/transfer-center-debug.log` after running with `--debug` (redact personal paths).
+4. Relevant lines from `~/Library/Application Support/DynamicLake/PluginLogs/usb-ssd-status-debug.log` after running with `--debug` (redact personal paths).
 
 ## Security issues
 

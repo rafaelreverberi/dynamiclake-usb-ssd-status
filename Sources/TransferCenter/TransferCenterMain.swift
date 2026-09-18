@@ -96,7 +96,7 @@ private enum Main {
                 installSignalHandlers { bridge.close() }
                 RunLoop.main.run()
             } catch {
-                fputs("Transfer Center mock: \(error.localizedDescription)\n", stderr)
+                fputs("USB / SSD Status mock: \(error.localizedDescription)\n", stderr)
                 exit(64)
             }
             return
@@ -135,7 +135,7 @@ private enum Main {
             installSignalHandlers { runtime.stop() }
             RunLoop.main.run()
         } catch {
-            fputs("Transfer Center: \(error.localizedDescription)\n", stderr)
+            fputs("USB / SSD Status: \(error.localizedDescription)\n", stderr)
             exit(64)
         }
     }

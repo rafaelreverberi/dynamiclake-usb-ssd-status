@@ -13,7 +13,7 @@ public final class FSEventsTransferProvider: TransferProvider {
     private var streams: [String: FSEventStreamRef] = [:]
     private var activities: [String: Activity] = [:]
     private var volumesByID: [String: Volume] = [:]
-    private let queue = DispatchQueue(label: "com.rafaelreverberi.transfer-center.fsevents")
+    private let queue = DispatchQueue(label: "com.rafaelreverberi.usb-ssd-status.fsevents")
 
     public init() {}
 
