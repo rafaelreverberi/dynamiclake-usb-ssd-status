@@ -135,6 +135,43 @@ final class TransferCoordinatorTests: XCTestCase {
         provider.emit(.updated(second))
         XCTAssertEqual(settle(coordinator, count: 2).count, 2)
     }
+
+    func testSequentialFilesOnSameVolumeContinueSingleLogicalTransfer() {
+        let coordinator = TransferCoordinator()
+        let provider = FakeProvider("progress")
+        provider.delegate = coordinator
+        provider.emit(.updated(transfer(id: "file-1", provider: .foundationProgress, volume: "volume-1")))
+        provider.emit(.removed(id: "file-1", finalState: .completed))
+        var snapshot = settle(coordinator, count: 1)
+        XCTAssertEqual(snapshot[0].state, .completed)
+        XCTAssertEqual(snapshot[0].id, "file-1")
+
+        // Next file of the same Finder job starts immediately (new Progress object).
+        provider.emit(.updated(transfer(id: "file-2", provider: .foundationProgress, volume: "volume-1")))
+        snapshot = settle(coordinator, count: 1)
+        XCTAssertEqual(snapshot[0].id, "file-1", "Sequential files must not flash an intermediate success")
+        XCTAssertTrue(snapshot[0].state.isActive)
+        XCTAssertNil(snapshot[0].completedAt)
+
+        provider.emit(.removed(id: "file-2", finalState: .completed))
+        snapshot = settle(coordinator, count: 1)
+        XCTAssertEqual(snapshot[0].id, "file-1")
+        XCTAssertEqual(snapshot[0].state, .completed)
+    }
+
+    func testSequentialTransfersOnDifferentVolumesRemainSeparate() {
+        let coordinator = TransferCoordinator()
+        let provider = FakeProvider("progress")
+        provider.delegate = coordinator
+        provider.emit(.updated(transfer(id: "file-1", provider: .foundationProgress, volume: "volume-1")))
+        provider.emit(.removed(id: "file-1", finalState: .completed))
+        _ = settle(coordinator, count: 1)
+
+        provider.emit(.updated(transfer(id: "file-2", provider: .foundationProgress, volume: "volume-2")))
+        let snapshot = settle(coordinator, count: 2)
+        XCTAssertNotNil(snapshot.first(where: { $0.id == "file-1" }))
+        XCTAssertNotNil(snapshot.first(where: { $0.id == "file-2" }))
+    }
 }
 
 final class FormattingTests: XCTestCase {

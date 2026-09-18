@@ -8,6 +8,7 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
         let progress: Progress
         let volume: Volume
         let startedAt: Date
+        let transferID: String
         var lifecycle = ProgressLifecycleGate()
     }
 
@@ -37,7 +38,12 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
                 guard let self else { return nil }
                 let key = ObjectIdentifier(progress)
                 DispatchQueue.main.async {
-                    self.observed[key] = ObservedProgress(progress: progress, volume: volume, startedAt: Date())
+                    self.observed[key] = ObservedProgress(
+                        progress: progress,
+                        volume: volume,
+                        startedAt: Date(),
+                        transferID: "progress-\(UUID().uuidString)"
+                    )
                     self.ensureTimer()
                     self.sample(key: key)
                 }
@@ -86,7 +92,7 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
             Logger.shared.debug("Ignored terminal-only file progress for volume \(entry.volume.name)")
             return
         }
-        delegate?.transferProvider(self, emitted: .removed(id: transferID(for: progress), finalState: state))
+        delegate?.transferProvider(self, emitted: .removed(id: entry.transferID, finalState: state))
     }
 
     private func sample(key: ObjectIdentifier) {
@@ -95,7 +101,7 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
         let shouldEmit = entry.lifecycle.shouldEmit(state)
         observed[key] = entry
         guard shouldEmit else { return }
-        emit(entry.progress, volume: entry.volume, startedAt: entry.startedAt, state: state)
+        emit(entry.progress, volume: entry.volume, startedAt: entry.startedAt, transferID: entry.transferID, state: state)
     }
 
     private func transferState(_ progress: Progress) -> TransferState {
@@ -105,7 +111,7 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
         return .active
     }
 
-    private func emit(_ progress: Progress, volume: Volume, startedAt: Date, state: TransferState) {
+    private func emit(_ progress: Progress, volume: Volume, startedAt: Date, transferID: String, state: TransferState) {
         let fileURL = progress.fileURL
         let matchedVolume = currentVolumes
             .filter { fileURL?.standardizedFileURL.path.hasPrefix($0.mountURL.standardizedFileURL.path) == true }
@@ -114,7 +120,7 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
         let likelyByteUnits = throughput != nil
         let fraction = progress.isIndeterminate ? nil : clamped(progress.fractionCompleted)
         let transfer = Transfer(
-            id: transferID(for: progress),
+            id: transferID,
             kind: transferKind(progress.fileOperationKind),
             state: state,
             destinationURL: fileURL,
@@ -138,10 +144,6 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
             confidence: .exact
         )
         delegate?.transferProvider(self, emitted: .updated(transfer))
-    }
-
-    private func transferID(for progress: Progress) -> String {
-        "progress-\(ObjectIdentifier(progress).hashValue)"
     }
 
     private func transferKind(_ kind: Progress.FileOperationKind?) -> TransferKind {

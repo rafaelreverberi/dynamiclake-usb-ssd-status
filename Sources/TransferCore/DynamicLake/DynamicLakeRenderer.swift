@@ -234,7 +234,9 @@ public final class DynamicLakeRenderer {
     }
 
     private func sendThrottled(_ payload: [String: Any]) {
-        guard let data = try? JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys]),
+        var signaturePayload = payload
+        signaturePayload.removeValue(forKey: "requestID")
+        guard let data = try? JSONSerialization.data(withJSONObject: signaturePayload, options: [.sortedKeys]),
               let signature = String(data: data, encoding: .utf8), signature != lastPayloadSignature else { return }
         let delay = max(0, minimumUpdateInterval - Date().timeIntervalSince(lastSentAt))
         pendingWorkItem?.cancel()

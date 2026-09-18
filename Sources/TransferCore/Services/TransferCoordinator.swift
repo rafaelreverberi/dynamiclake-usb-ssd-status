@@ -6,6 +6,11 @@ public final class TransferCoordinator: TransferProviderDelegate {
 
     private var aliases: [String: String] = [:]
     private let queue = DispatchQueue(label: "com.rafaelreverberi.transfer-center.coordinator")
+    /// Finder publishes one Progress object per file for folder copies. Without
+    /// coalescing, each file completion would flash `Transfer complete` before
+    /// the next file starts. A new Foundation transfer on the same volume
+    /// shortly after a completion therefore continues that logical transfer.
+    private let foundationContinuationWindow: TimeInterval = 2.0
 
     public init() {}
 
@@ -55,6 +60,12 @@ public final class TransferCoordinator: TransferProviderDelegate {
         }
         if let current = transfers[incoming.id] {
             transfers[incoming.id] = merged(current, incoming, canonicalID: incoming.id)
+            publish()
+            return
+        }
+        if let continuation = continuationCandidate(for: incoming) {
+            aliases[incoming.id] = continuation.id
+            transfers[continuation.id] = continued(continuation, with: incoming)
             publish()
             return
         }
@@ -118,6 +129,40 @@ public final class TransferCoordinator: TransferProviderDelegate {
         return candidates.max { $0.provider.priority < $1.provider.priority }
     }
 
+    private func continuationCandidate(for incoming: Transfer) -> Transfer? {
+        guard incoming.provider == .foundationProgress,
+              incoming.state.isActive,
+              let volumeID = incoming.destinationVolumeID ?? incoming.sourceVolumeID else { return nil }
+        let reference = incoming.updatedAt
+        return transfers.values
+            .filter { current in
+                guard current.provider == .foundationProgress,
+                      !current.state.isActive,
+                      current.state == .completed,
+                      (current.destinationVolumeID == volumeID || current.sourceVolumeID == volumeID),
+                      let completedAt = current.completedAt else { return false }
+                return reference.timeIntervalSince(completedAt) >= 0 &&
+                    reference.timeIntervalSince(completedAt) <= foundationContinuationWindow
+            }
+            .max { ($0.completedAt ?? $0.updatedAt) < ($1.completedAt ?? $1.updatedAt) }
+    }
+
+    private func continued(_ terminal: Transfer, with incoming: Transfer) -> Transfer {
+        var result = incoming
+        result.id = terminal.id
+        result.sourceURL = incoming.sourceURL ?? terminal.sourceURL
+        result.destinationURL = incoming.destinationURL ?? terminal.destinationURL
+        result.sourceVolumeID = incoming.sourceVolumeID ?? terminal.sourceVolumeID
+        result.destinationVolumeID = incoming.destinationVolumeID ?? terminal.destinationVolumeID
+        result.volumeName = incoming.volumeName ?? terminal.volumeName
+        result.startedAt = min(terminal.startedAt, incoming.startedAt)
+        result.updatedAt = max(terminal.updatedAt, incoming.updatedAt)
+        result.confidence = max(terminal.confidence, incoming.confidence)
+        result.completedAt = nil
+        result.failureDescription = nil
+        return result
+    }
+
     private func merged(_ existing: Transfer, _ incoming: Transfer, canonicalID: String) -> Transfer {
         let preferred = incoming.provider.priority >= existing.provider.priority ? incoming : existing
         let secondary = incoming.provider.priority >= existing.provider.priority ? existing : incoming
@@ -139,6 +184,10 @@ public final class TransferCoordinator: TransferProviderDelegate {
         result.startedAt = min(existing.startedAt, incoming.startedAt)
         result.updatedAt = max(existing.updatedAt, incoming.updatedAt)
         result.confidence = max(existing.confidence, incoming.confidence)
+        if result.state.isActive {
+            result.completedAt = nil
+            result.failureDescription = nil
+        }
         return result
     }
 
