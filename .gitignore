@@ -1,0 +1,9 @@
+.build/
+.swiftpm/
+.DS_Store
+DerivedData/
+*.dynamiclakeplugin/
+*.dynamiclakeplugin.zip
+*.xcresult
+__pycache__/
+transfer-center-debug.log

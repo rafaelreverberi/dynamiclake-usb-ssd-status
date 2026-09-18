@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "identifier": "com.rafaelreverberi.plugins.transfer-center",
+  "name": "Transfer Center",
+  "version": "0.1.0",
+  "developerName": "Rafael Reverberi",
+  "description": "Shows file-transfer activity for external drives in DynamicLake.",
+  "executable": "transfer-center",
+  "icon": "icon.png",
+  "arguments": [],
+  "autoStart": true,
+  "settings": [
+    {
+      "id": "finderAccessibilityFallback",
+      "type": "switch",
+      "title": "Finder Accessibility Fallback",
+      "description": "Use Finder's accessible progress indicators when Foundation Progress is unavailable. Permission is never prompted automatically.",
+      "systemImage": "figure.wave",
+      "tint": "blue",
+      "default": false
+    },
+    {
+      "id": "showDriveConnected",
+      "type": "switch",
+      "title": "Drive Connected Peek",
+      "description": "Briefly show newly mounted external drives and their available space.",
+      "systemImage": "externaldrive",
+      "tint": "blue",
+      "default": true
+    }
+  ]
+}
