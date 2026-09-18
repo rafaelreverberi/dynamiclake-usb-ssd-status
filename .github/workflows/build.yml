@@ -23,7 +23,7 @@ jobs:
       - name: Validate package
         run: |
           ./scripts/check-package.sh TransferCenter.dynamiclakeplugin
-          ./scripts/check-package.sh dist/TransferCenter-0.1.0.dynamiclakeplugin.zip
+          ./scripts/check-package.sh "dist/TransferCenter-$(jq -r .version plugin.json).dynamiclakeplugin.zip"
       - name: Socket protocol smoke test
         run: ./scripts/socket-smoke.py "$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/transfer-center"
       - uses: actions/upload-artifact@v4

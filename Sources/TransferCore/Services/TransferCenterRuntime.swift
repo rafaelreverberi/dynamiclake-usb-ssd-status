@@ -35,7 +35,14 @@ public final class TransferCenterRuntime {
             guard let self, volume.isRelevantExternal, self.settings.showDriveConnected else { return }
             self.renderer.showMounted(volume)
         }
-        monitor.onUnmounted = { [weak self] volume in self?.coordinator.handleVolumeDisconnected(volume.id) }
+        monitor.onUnmounted = { [weak self] volume in
+            guard let self, volume.isRelevantExternal else { return }
+            let interruptedTransfer = self.coordinator.hasActiveTransfer(for: volume.id)
+            self.coordinator.handleVolumeDisconnected(volume.id)
+            if !interruptedTransfer, self.settings.showDriveConnected {
+                self.renderer.showUnmounted(volume)
+            }
+        }
         monitor.start()
         foundationProvider.start(volumes: monitor.volumes)
         fseventsProvider.start(volumes: monitor.volumes)

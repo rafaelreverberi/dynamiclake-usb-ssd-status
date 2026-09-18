@@ -57,31 +57,51 @@ public final class DynamicLakeRenderer {
     }
 
     public func showMounted(_ volume: Volume) {
-        let id = "transfer-center.mounted"
         var details = "\(volume.name) connected"
         if let free = TransferFormatters.bytes(volume.availableCapacity) { details += " · \(free) free" }
-        trySend(Self.peekPayload(
-            activityID: id,
+        showTransientPeek(
+            activityID: "transfer-center.volume-event",
             text: details,
             systemImage: "externaldrive.fill",
-            supportsPresentSneakPeek: supportsPresentSneakPeek
-        ))
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in self?.trySend(Self.dismissPayload(activityID: id)) }
+            status: "success",
+            tint: "green"
+        )
+    }
+
+    public func showUnmounted(_ volume: Volume) {
+        showTransientPeek(
+            activityID: "transfer-center.volume-event",
+            text: "\(volume.name) disconnected",
+            systemImage: "externaldrive.badge.xmark",
+            status: "warning",
+            tint: "orange"
+        )
     }
 
     public func showEjectResult(_ result: Result<Void, EjectError>, volumeName: String) {
         let text: String
         let symbol: String
+        let statusValue: String
+        let tint: String
         switch result {
-        case .success: text = "\(volumeName) ejected"; symbol = "checkmark.circle.fill"
-        case .failure(let error): text = error.localizedDescription; symbol = "exclamationmark.triangle.fill"
+        case .success:
+            text = "\(volumeName) ejected"
+            symbol = "checkmark.circle.fill"
+            statusValue = "success"
+            tint = "green"
+        case .failure(let error):
+            text = error.localizedDescription
+            symbol = "exclamationmark.triangle.fill"
+            statusValue = "failed"
+            tint = "red"
         }
-        trySend(Self.peekPayload(
+        showTransientPeek(
             activityID: "transfer-center.eject-result",
             text: text,
             systemImage: symbol,
-            supportsPresentSneakPeek: supportsPresentSneakPeek
-        ))
+            status: statusValue,
+            tint: tint
+        )
     }
 
     public static func activePayload(transfer: Transfer, activeCount: Int, command: String) -> [String: Any] {
@@ -148,16 +168,18 @@ public final class DynamicLakeRenderer {
         activityID: String,
         text value: String,
         systemImage: String,
+        status statusValue: String = "success",
+        tint: String = "blue",
         supportsPresentSneakPeek: Bool = false
     ) -> [String: Any] {
         let compact: [String: Any] = [
-            "leftSlot": image(id: "peek-icon", symbol: systemImage, tint: "blue"),
-            "rightSlot": status(id: "peek-status", value: "success", tint: "blue"),
+            "leftSlot": image(id: "peek-icon", symbol: systemImage, tint: tint),
+            "rightSlot": status(id: "peek-status", value: statusValue, tint: tint),
         ]
         return base(command: "create", activityID: activityID, surfaces: [
             "compactLiveActivity": compact,
             "sneakPeek": [
-                "leftSlot": image(id: "peek-detail-icon", symbol: systemImage, tint: "blue"),
+                "leftSlot": image(id: "peek-detail-icon", symbol: systemImage, tint: tint),
                 "center": text(id: "peek-detail", value: bounded(value), style: "marquee"),
             ],
         ], presentSneakPeekSeconds: supportsPresentSneakPeek ? 2 : nil)
@@ -201,6 +223,26 @@ public final class DynamicLakeRenderer {
     private func trySend(_ payload: [String: Any]) {
         do { try bridge.send(payload) }
         catch { Logger.shared.warning("DynamicLake send failed: \(error.localizedDescription)") }
+    }
+
+    private func showTransientPeek(
+        activityID: String,
+        text: String,
+        systemImage: String,
+        status: String,
+        tint: String
+    ) {
+        trySend(Self.peekPayload(
+            activityID: activityID,
+            text: text,
+            systemImage: systemImage,
+            status: status,
+            tint: tint,
+            supportsPresentSneakPeek: supportsPresentSneakPeek
+        ))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+            self?.trySend(Self.dismissPayload(activityID: activityID))
+        }
     }
 
     private static func base(

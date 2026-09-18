@@ -34,7 +34,7 @@ Classification does not assume every `/Volumes` path is USB:
 - non-internal local/ejectable → external local
 - incomplete evidence → unknown
 
-Only external-local and removable volumes are monitored in 0.1.0.
+Only external-local and removable volumes are monitored in 0.1.x. A relevant mount produces a four-second connected Sneak Peek. Unmount metadata is retained from `willUnmount` until `didUnmount`, allowing a disconnected Sneak Peek after the URL has disappeared.
 
 ## Providers
 
@@ -71,7 +71,7 @@ The renderer delays first presentation by 0.75 seconds and caps output at four u
 
 ## Eject safety
 
-`EjectService` calls `NSWorkspace.unmountAndEjectDevice(at:)`. It rejects non-ejectable volumes, known active transfers, or uncertain recent-write state. It never force-unmounts and never auto-ejects. In 0.1.0 the renderer offers Eject only after a semantic provider reports completion and a destination volume is known.
+`EjectService` calls `NSWorkspace.unmountAndEjectDevice(at:)`. It rejects non-ejectable volumes, known active transfers, or uncertain recent-write state. It never force-unmounts and never auto-ejects. In 0.1.x the renderer offers Eject only after a semantic provider reports completion and a destination volume is known.
 
 ## Lifecycle and failure behavior
 
@@ -80,3 +80,4 @@ The renderer delays first presentation by 0.75 seconds and caps output at four u
 - Unmount during a matching active transfer produces `volumeDisconnected`, not a corruption claim.
 - An unpublishing Progress proxy that is neither finished nor cancelled becomes failed.
 - FSEvents quieting removes the fallback activity silently.
+- Connected, disconnected, and eject-result peeks dismiss after four seconds. An unmount during an active transfer uses the transfer-interrupted terminal state instead of creating a competing volume-event activity.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 - 2026-09-18
+
+- Fixed the development mock activity remaining visible indefinitely.
+- Added brief connected and disconnected drive Sneak Peeks that dismiss automatically.
+- Preserved disconnected-volume metadata across the macOS unmount notification sequence.
+- Made eject-result peeks transient as well.
+
 ## 0.1.0 - 2026-09-18
 
 - Initial development release.

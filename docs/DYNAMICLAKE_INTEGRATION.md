@@ -27,7 +27,7 @@ TransferCenter.dynamiclakeplugin/
 └── PrivacyInfo.xcprivacy
 ```
 
-The Market archive preserves this package directory as the single archive root: `TransferCenter-0.1.0.dynamiclakeplugin.zip`.
+The Market archive preserves this package directory as the single archive root: `TransferCenter-0.1.1.dynamiclakeplugin.zip`.
 
 ## plugin.json
 
@@ -107,7 +107,7 @@ Transfer Center conservatively normalizes Sneak Peek center text to one line and
 1. Run `./scripts/build-release.sh`.
 2. DynamicLake → Settings → Plugins → Install Local.
 3. Select `TransferCenter.dynamiclakeplugin`.
-4. For a deterministic host UI check, install `TransferCenter-Development.dynamiclakeplugin` instead; it launches with `--mock-transfer`.
+4. For a deterministic host UI check, install `TransferCenter-Development.dynamiclakeplugin` instead; it launches with `--mock-transfer`, shows start/completion, and dismisses itself. The production package has no mock arguments.
 5. For socket-only validation, run `scripts/socket-smoke.py` against the Release binary.
 
 The development package proves package launch, framing, schema acceptance, and rendering. It does not prove Finder or hardware transfer detection.

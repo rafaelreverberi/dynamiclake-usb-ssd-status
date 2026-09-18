@@ -5,13 +5,14 @@ Legend: `[x]` actually run and passed, `[ ]` not run. Automated/stub evidence is
 ## Automated validation run on 2026-09-18
 
 - [x] Debug Swift build (`swift build`)
-- [x] Unit tests (`swift test`): 15 tests, 0 failures
+- [x] Unit tests (`swift test`): 16 tests, 0 failures
 - [x] Universal Release build (`arm64`, `x86_64`)
 - [x] DynamicLake JSON payload serialization tests
 - [x] Local framed Unix-socket create/update/response smoke test
 - [x] Package validation for folder and ZIP
 - [x] Volume diagnostics on the development Mac
 - [x] Finder Accessibility fallback disabled path does not prompt and remains optional
+- [x] Development mock emits a final dismiss frame and returns DynamicLake to idle
 
 The socket smoke test uses a controlled synthetic transfer. It validates transport and payload lifecycle, not Finder detection or visible DynamicLake UI.
 

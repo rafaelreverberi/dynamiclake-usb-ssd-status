@@ -90,6 +90,9 @@ private enum Main {
                         supportsPresentSneakPeek: supportsPresentSneakPeek
                     ))
                 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                    try? bridge.send(DynamicLakeRenderer.dismissPayload(activityID: DynamicLakeRenderer.activityID))
+                }
                 installSignalHandlers { bridge.close() }
                 RunLoop.main.run()
             } catch {

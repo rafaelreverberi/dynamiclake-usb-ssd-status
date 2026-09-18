@@ -60,7 +60,11 @@ def main() -> int:
                     completion = frame
                     break
             assert completion is not None, "completion update with presentSneakPeek was not received"
-            print("Socket smoke test passed: create and completion update frames decoded.")
+            dismissed = read_frame(connection)
+            assert dismissed["type"] == "dismiss"
+            assert dismissed["activityID"] == "transfer-center.active"
+            send_frame(connection, {"type": "response", "ok": True, "requestID": dismissed.get("requestID")})
+            print("Socket smoke test passed: create, completion, and idle dismissal frames decoded.")
             connection.close()
         finally:
             process.terminate()

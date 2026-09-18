@@ -207,4 +207,28 @@ final class DynamicLakeRenderingTests: XCTestCase {
         XCTAssertNil(sneak["rightSlot"])
         XCTAssertNil(payload["presentSneakPeek"], "Feature-gated fields must be omitted for older hosts")
     }
+
+    func testVolumeEventPeekUsesRequestedStateAndIsFeatureGated() throws {
+        let payload = DynamicLakeRenderer.peekPayload(
+            activityID: "transfer-center.volume-event",
+            text: "Backup SSD disconnected",
+            systemImage: "externaldrive.badge.xmark",
+            status: "warning",
+            tint: "orange",
+            supportsPresentSneakPeek: true
+        )
+        XCTAssertEqual(payload["presentSneakPeek"] as? Int, 2)
+        let surfaces = try XCTUnwrap(payload["surfaces"] as? [String: Any])
+        let compact = try XCTUnwrap(surfaces["compactLiveActivity"] as? [String: Any])
+        let right = try XCTUnwrap(compact["rightSlot"] as? [String: Any])
+        XCTAssertEqual(right["status"] as? String, "warning")
+        XCTAssertEqual(right["tint"] as? String, "orange")
+
+        let compatible = DynamicLakeRenderer.peekPayload(
+            activityID: "transfer-center.volume-event",
+            text: "Backup SSD connected",
+            systemImage: "externaldrive.fill"
+        )
+        XCTAssertNil(compatible["presentSneakPeek"])
+    }
 }

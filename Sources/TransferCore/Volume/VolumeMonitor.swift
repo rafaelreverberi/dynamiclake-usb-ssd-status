@@ -12,6 +12,7 @@ public final class VolumeMonitor: NSObject {
 
     public private(set) var volumes: [Volume] = []
     private var started = false
+    private var pendingUnmounts: [String: Volume] = [:]
 
     public func start() {
         guard !started else { return }
@@ -46,11 +47,17 @@ public final class VolumeMonitor: NSObject {
 
     @objc private func willUnmount(_ notification: Notification) {
         guard let volume = volume(from: notification) else { return }
+        pendingUnmounts[volume.mountURL.standardizedFileURL.path] = volume
         onWillUnmount?(volume)
     }
 
     @objc private func didUnmount(_ notification: Notification) {
+        let url = notification.userInfo?[NSWorkspace.volumeURLUserInfoKey] as? URL
+        let path = url?.standardizedFileURL.path
         let removed = volume(from: notification)
+            ?? path.flatMap { pendingUnmounts[$0] }
+            ?? path.flatMap { removedPath in volumes.first { $0.mountURL.standardizedFileURL.path == removedPath } }
+        if let path { pendingUnmounts.removeValue(forKey: path) }
         refresh()
         if let removed { onUnmounted?(removed) }
     }

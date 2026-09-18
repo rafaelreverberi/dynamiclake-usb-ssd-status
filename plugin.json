@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "identifier": "com.rafaelreverberi.plugins.transfer-center",
   "name": "Transfer Center",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "developerName": "Rafael Reverberi",
   "description": "Shows file-transfer activity for external drives in DynamicLake.",
   "executable": "transfer-center",
@@ -22,8 +22,8 @@
     {
       "id": "showDriveConnected",
       "type": "switch",
-      "title": "Drive Connected Peek",
-      "description": "Briefly show newly mounted external drives and their available space.",
+      "title": "Drive Connection Peeks",
+      "description": "Briefly show external drives when they connect or disconnect, including available space when known.",
       "systemImage": "externaldrive",
       "tint": "blue",
       "default": true

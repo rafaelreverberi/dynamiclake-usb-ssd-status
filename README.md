@@ -17,6 +17,8 @@ Transfer Center is a local, native Swift plugin. It correlates public macOS file
 - Completion, cancellation, failure, and drive-disconnected states.
 - Safe eject action after confirmed completion; never force-unmounts.
 - Event-driven volume mount/unmount handling and no idle directory crawling.
+- Brief, self-dismissing Sneak Peeks when an external drive connects or disconnects.
+- No persistent activity while idle.
 - Local-only operation with no telemetry, analytics, accounts, or network service.
 
 ## Screenshots
@@ -42,7 +44,7 @@ Screenshots will be added after the real-device test matrix has been run. The de
 3. Select `TransferCenter.dynamiclakeplugin` from this repository.
 4. Keep **Finder Accessibility Fallback** disabled initially. It is not needed for Foundation Progress or FSEvents.
 
-For a visual host-only check, install `TransferCenter-Development.dynamiclakeplugin`; it sends a synthetic 42% transfer followed by completion through the same renderer and socket protocol.
+For a visual host-only check, install `TransferCenter-Development.dynamiclakeplugin`; it sends a synthetic 42% transfer followed by completion and then dismisses itself. Do not use the development package as the everyday plugin.
 
 ## Build from source
 
@@ -51,7 +53,7 @@ swift build
 swift test
 swift build -c release --arch arm64 --arch x86_64
 ./scripts/package-plugin.sh
-./scripts/check-package.sh dist/TransferCenter-0.1.0.dynamiclakeplugin.zip
+./scripts/check-package.sh dist/TransferCenter-0.1.1.dynamiclakeplugin.zip
 ```
 
 The Release binary is universal (`arm64` and `x86_64`). No third-party runtime dependency is bundled.
@@ -108,7 +110,7 @@ Accessibility is optional and only supports the Finder fallback. Transfer Center
 
 ## Supported transfer scenarios
 
-The architecture supports internal → external, external → internal, and external → external operations when at least one provider exposes usable evidence. Public Foundation subscriptions are rooted at external volumes, so Finder operations whose published URL exists only on an internal destination may require the optional AX fallback. Network/NAS volumes are classified but intentionally not monitored in 0.1.0.
+The architecture supports internal → external, external → internal, and external → external operations when at least one provider exposes usable evidence. Public Foundation subscriptions are rooted at external volumes, so Finder operations whose published URL exists only on an internal destination may require the optional AX fallback. Network/NAS volumes are classified but intentionally not monitored in 0.1.x.
 
 ## Known limitations
 
@@ -142,7 +144,7 @@ No hardware scenario in `docs/TESTING.md` is marked passed unless it actually ra
 
 `scripts/build-release.sh` builds a universal Release executable, runs tests, packages the plugin, validates manifest/icon/executable/layout/size constraints, runs the wire smoke test, and prints SHA-256. The current checks enforce the documented Market limits supplied for this project: 7 MB ZIP, 20 MB unpacked, square PNG icon no larger than 1.5 MB.
 
-The archive is created at `dist/TransferCenter-0.1.0.dynamiclakeplugin.zip`. Releases are not automatically published.
+The archive is created at `dist/TransferCenter-0.1.1.dynamiclakeplugin.zip`. Releases are not automatically published.
 
 ## Icon
 
