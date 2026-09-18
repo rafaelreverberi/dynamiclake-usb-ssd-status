@@ -24,10 +24,24 @@ fi
 
 [[ -d "$package" ]] || { print -u2 "Package not found: $package"; exit 1; }
 [[ -f "$package/plugin.json" ]] || { print -u2 "plugin.json is missing."; exit 1; }
-jq -e '.schemaVersion == 1 and (.identifier | type == "string") and (.name | type == "string") and (.version | type == "string") and (.developerName | type == "string") and (.executable | type == "string") and (.autoStart | type == "boolean")' "$package/plugin.json" >/dev/null
+(( $(stat -f %z "$package/plugin.json") <= 128 * 1024 )) || { print -u2 "plugin.json exceeds 128 KB."; exit 1; }
+jq -e '
+  .schemaVersion == 1 and
+  (.identifier | type == "string" and length >= 3 and length <= 128 and test("^[A-Za-z0-9._-]+$")) and
+  (.name | type == "string" and length >= 1 and length <= 80) and
+  (.version | type == "string" and length >= 1 and length <= 40) and
+  (.developerName | type == "string") and
+  (.executable | type == "string" and length > 0) and
+  (.icon | type == "string" and length > 0) and
+  (.arguments | type == "array") and
+  (.autoStart | type == "boolean") and
+  ((.settings // []) | type == "array" and length <= 24 and all(.[]; .type == "switch" or .type == "slider" or .type == "select" or .type == "button"))
+' "$package/plugin.json" >/dev/null
 
 executable="$(jq -r .executable "$package/plugin.json")"
 icon="$(jq -r .icon "$package/plugin.json")"
+[[ "$executable" != /* && "$executable" != *..* ]] || { print -u2 "Executable path must stay inside the package."; exit 1; }
+[[ "$icon" != /* && "$icon" != *..* ]] || { print -u2 "Icon path must stay inside the package."; exit 1; }
 [[ -x "$package/$executable" ]] || { print -u2 "Executable is missing or not executable: $executable"; exit 1; }
 [[ -f "$package/$icon" ]] || { print -u2 "Icon is missing: $icon"; exit 1; }
 [[ -f "$package/drive-transfer-symbol.png" ]] || { print -u2 "Inline drive artwork is missing."; exit 1; }
