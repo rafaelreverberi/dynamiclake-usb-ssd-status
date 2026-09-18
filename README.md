@@ -53,7 +53,7 @@ swift build
 swift test
 swift build -c release --arch arm64 --arch x86_64
 ./scripts/package-plugin.sh
-./scripts/check-package.sh dist/TransferCenter-0.1.1.dynamiclakeplugin.zip
+./scripts/check-package.sh dist/TransferCenter-0.1.2.dynamiclakeplugin.zip
 ```
 
 The Release binary is universal (`arm64` and `x86_64`). No third-party runtime dependency is bundled.
@@ -144,7 +144,7 @@ No hardware scenario in `docs/TESTING.md` is marked passed unless it actually ra
 
 `scripts/build-release.sh` builds a universal Release executable, runs tests, packages the plugin, validates manifest/icon/executable/layout/size constraints, runs the wire smoke test, and prints SHA-256. The current checks enforce the documented Market limits supplied for this project: 7 MB ZIP, 20 MB unpacked, square PNG icon no larger than 1.5 MB.
 
-The archive is created at `dist/TransferCenter-0.1.1.dynamiclakeplugin.zip`. Releases are not automatically published.
+The archive is created at `dist/TransferCenter-0.1.2.dynamiclakeplugin.zip`. Releases are not automatically published.
 
 ## Icon
 

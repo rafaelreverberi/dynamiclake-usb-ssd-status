@@ -64,7 +64,8 @@ public final class DynamicLakeRenderer {
             text: details,
             systemImage: "externaldrive.fill",
             status: "success",
-            tint: "green"
+            tint: "blue",
+            rightTint: "green"
         )
     }
 
@@ -72,9 +73,11 @@ public final class DynamicLakeRenderer {
         showTransientPeek(
             activityID: "transfer-center.volume-event",
             text: "\(volume.name) disconnected",
-            systemImage: "externaldrive.badge.xmark",
-            status: "warning",
-            tint: "orange"
+            systemImage: "externaldrive.fill",
+            rightSystemImage: "xmark",
+            status: "success",
+            tint: "blue",
+            rightTint: "gray"
         )
     }
 
@@ -168,13 +171,21 @@ public final class DynamicLakeRenderer {
         activityID: String,
         text value: String,
         systemImage: String,
+        rightSystemImage: String? = nil,
         status statusValue: String = "success",
         tint: String = "blue",
+        rightTint: String? = nil,
         supportsPresentSneakPeek: Bool = false
     ) -> [String: Any] {
+        let trailing: [String: Any]
+        if let rightSystemImage {
+            trailing = image(id: "peek-trailing-icon", symbol: rightSystemImage, tint: rightTint ?? tint)
+        } else {
+            trailing = status(id: "peek-status", value: statusValue, tint: rightTint ?? tint)
+        }
         let compact: [String: Any] = [
             "leftSlot": image(id: "peek-icon", symbol: systemImage, tint: tint),
-            "rightSlot": status(id: "peek-status", value: statusValue, tint: tint),
+            "rightSlot": trailing,
         ]
         return base(command: "create", activityID: activityID, surfaces: [
             "compactLiveActivity": compact,
@@ -229,15 +240,19 @@ public final class DynamicLakeRenderer {
         activityID: String,
         text: String,
         systemImage: String,
+        rightSystemImage: String? = nil,
         status: String,
-        tint: String
+        tint: String,
+        rightTint: String? = nil
     ) {
         trySend(Self.peekPayload(
             activityID: activityID,
             text: text,
             systemImage: systemImage,
+            rightSystemImage: rightSystemImage,
             status: status,
             tint: tint,
+            rightTint: rightTint,
             supportsPresentSneakPeek: supportsPresentSneakPeek
         ))
         DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in

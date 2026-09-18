@@ -27,7 +27,7 @@ TransferCenter.dynamiclakeplugin/
 └── PrivacyInfo.xcprivacy
 ```
 
-The Market archive preserves this package directory as the single archive root: `TransferCenter-0.1.1.dynamiclakeplugin.zip`.
+The Market archive preserves this package directory as the single archive root: `TransferCenter-0.1.2.dynamiclakeplugin.zip`.
 
 ## plugin.json
 
