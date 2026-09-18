@@ -8,6 +8,7 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
         let progress: Progress
         let volume: Volume
         let startedAt: Date
+        var lifecycle = ProgressLifecycleGate()
     }
 
     private var subscribers: [String: Any] = [:]
@@ -38,7 +39,7 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
                 DispatchQueue.main.async {
                     self.observed[key] = ObservedProgress(progress: progress, volume: volume, startedAt: Date())
                     self.ensureTimer()
-                    self.emit(progress, volume: volume, startedAt: Date())
+                    self.sample(key: key)
                 }
                 return { [weak self] in
                     DispatchQueue.main.async {
@@ -70,9 +71,7 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
     }
 
     private func poll() {
-        for entry in observed.values {
-            emit(entry.progress, volume: entry.volume, startedAt: entry.startedAt)
-        }
+        for key in Array(observed.keys) { sample(key: key) }
         if observed.isEmpty {
             timer?.cancel()
             timer = nil
@@ -80,23 +79,37 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
     }
 
     private func finish(key: ObjectIdentifier) {
-        guard let entry = observed.removeValue(forKey: key) else { return }
+        guard var entry = observed.removeValue(forKey: key) else { return }
         let progress = entry.progress
         let state: TransferState = progress.isCancelled ? .cancelled : (progress.isFinished ? .completed : .failed)
+        guard entry.lifecycle.shouldEmit(state) else {
+            Logger.shared.debug("Ignored terminal-only file progress for volume \(entry.volume.name)")
+            return
+        }
         delegate?.transferProvider(self, emitted: .removed(id: transferID(for: progress), finalState: state))
     }
 
-    private func emit(_ progress: Progress, volume: Volume, startedAt: Date) {
+    private func sample(key: ObjectIdentifier) {
+        guard var entry = observed[key] else { return }
+        let state = transferState(entry.progress)
+        let shouldEmit = entry.lifecycle.shouldEmit(state)
+        observed[key] = entry
+        guard shouldEmit else { return }
+        emit(entry.progress, volume: entry.volume, startedAt: entry.startedAt, state: state)
+    }
+
+    private func transferState(_ progress: Progress) -> TransferState {
+        if progress.isCancelled { return .cancelled }
+        if progress.isFinished { return .completed }
+        if progress.totalUnitCount <= 0 || progress.isIndeterminate { return .indeterminate }
+        return .active
+    }
+
+    private func emit(_ progress: Progress, volume: Volume, startedAt: Date, state: TransferState) {
         let fileURL = progress.fileURL
         let matchedVolume = currentVolumes
             .filter { fileURL?.standardizedFileURL.path.hasPrefix($0.mountURL.standardizedFileURL.path) == true }
             .max { $0.mountURL.path.count < $1.mountURL.path.count } ?? volume
-        let state: TransferState
-        if progress.isCancelled { state = .cancelled }
-        else if progress.isFinished { state = .completed }
-        else if progress.totalUnitCount <= 0 || progress.isIndeterminate { state = .indeterminate }
-        else { state = .active }
-
         let throughput = progress.throughput.map(Int64.init)
         let likelyByteUnits = throughput != nil
         let fraction = progress.isIndeterminate ? nil : clamped(progress.fractionCompleted)
@@ -148,5 +161,20 @@ public final class FoundationProgressProvider: TransferProvider, @unchecked Send
 
     deinit {
         if Thread.isMainThread { stop() }
+    }
+}
+
+struct ProgressLifecycleGate {
+    private(set) var hasSeenNonterminal = false
+    private(set) var hasEmittedTerminal = false
+
+    mutating func shouldEmit(_ state: TransferState) -> Bool {
+        if state.isActive {
+            hasSeenNonterminal = true
+            return true
+        }
+        guard hasSeenNonterminal, !hasEmittedTerminal else { return false }
+        hasEmittedTerminal = true
+        return true
     }
 }

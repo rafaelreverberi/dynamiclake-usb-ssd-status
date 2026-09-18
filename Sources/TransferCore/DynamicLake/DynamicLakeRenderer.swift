@@ -6,6 +6,7 @@ public final class DynamicLakeRenderer {
     private let minimumVisibleDelay: TimeInterval = 0.75
     private let minimumUpdateInterval: TimeInterval = 0.25
     private var firstSeen: [String: Date] = [:]
+    private var presentedTransferIDs: Set<String> = []
     private var lastPayloadSignature: String?
     private var lastSentAt = Date.distantPast
     private var published = false
@@ -25,11 +26,13 @@ public final class DynamicLakeRenderer {
     public func render(_ transfers: [Transfer]) {
         dispatchPrecondition(condition: .onQueue(.main))
         let active = transfers.filter(\.state.isActive)
+        presentedTransferIDs.formIntersection(Set(transfers.map(\.id)))
         for transfer in active where firstSeen[transfer.id] == nil { firstSeen[transfer.id] = Date() }
         firstSeen = firstSeen.filter { id, _ in active.contains(where: { $0.id == id }) }
 
         if let selected = selectedActive(active),
            Date().timeIntervalSince(firstSeen[selected.id] ?? Date()) >= minimumVisibleDelay {
+            presentedTransferIDs.insert(selected.id)
             sendThrottled(Self.activePayload(transfer: selected, activeCount: active.count, command: published ? "update" : "create"))
             presentedEjectVolumeID = nil
             return
@@ -40,7 +43,7 @@ public final class DynamicLakeRenderer {
             return
         }
 
-        if let terminal = transfers.filter({ !$0.state.isActive && $0.provider != .fsevents }).max(by: { $0.updatedAt < $1.updatedAt }) {
+        if let terminal = Self.eligibleTerminal(in: transfers, presentedTransferIDs: presentedTransferIDs) {
             presentedEjectVolumeID = terminal.state == .completed ? terminal.destinationVolumeID : nil
             sendThrottled(Self.terminalPayload(
                 transfer: terminal,
@@ -201,6 +204,12 @@ public final class DynamicLakeRenderer {
 
     public static func dismissPayload(activityID: String) -> [String: Any] {
         ["schemaVersion": 1, "requestID": UUID().uuidString, "type": "dismiss", "activityID": activityID]
+    }
+
+    static func eligibleTerminal(in transfers: [Transfer], presentedTransferIDs: Set<String>) -> Transfer? {
+        transfers.filter {
+            !$0.state.isActive && $0.provider != .fsevents && presentedTransferIDs.contains($0.id)
+        }.max(by: { $0.updatedAt < $1.updatedAt })
     }
 
     private func selectedActive(_ transfers: [Transfer]) -> Transfer? {

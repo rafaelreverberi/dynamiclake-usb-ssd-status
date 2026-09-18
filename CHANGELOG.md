@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5 - 2026-09-18
+
+- Suppressed Foundation Progress objects that are already terminal when first published.
+- Show completion only for a transfer that previously crossed the Live Activity visibility threshold.
+- Prevented short Finder preflight operations from flashing `Transfer complete` before the real copy starts.
+
 ## 0.1.4 - 2026-09-18
 
 - Fixed removable drives incorrectly showing `0 KB free` when macOS reports zero only for the important-usage capacity estimate.

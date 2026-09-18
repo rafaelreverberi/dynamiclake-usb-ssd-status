@@ -255,4 +255,52 @@ final class DynamicLakeRenderingTests: XCTestCase {
         )
         XCTAssertNil(compatible["presentSneakPeek"])
     }
+
+    func testCompletionIsEligibleOnlyAfterThatTransferWasPresented() {
+        let completed = Transfer(
+            id: "preflight",
+            kind: .copying,
+            state: .completed,
+            destinationVolumeID: "volume-1",
+            volumeName: "USB",
+            displayName: "Copying",
+            startedAt: Date(),
+            updatedAt: Date(),
+            completedAt: Date(),
+            provider: .foundationProgress,
+            confidence: .exact
+        )
+
+        XCTAssertNil(DynamicLakeRenderer.eligibleTerminal(
+            in: [completed],
+            presentedTransferIDs: []
+        ))
+        XCTAssertEqual(DynamicLakeRenderer.eligibleTerminal(
+            in: [completed],
+            presentedTransferIDs: [completed.id]
+        )?.id, completed.id)
+    }
+}
+
+final class ProgressLifecycleGateTests: XCTestCase {
+    func testAlreadyFinishedPublicationIsSuppressed() {
+        var gate = ProgressLifecycleGate()
+        XCTAssertFalse(gate.shouldEmit(.completed))
+        XCTAssertFalse(gate.hasSeenNonterminal)
+        XCTAssertFalse(gate.hasEmittedTerminal)
+    }
+
+    func testCompletionFollowsObservedActivityExactlyOnce() {
+        var gate = ProgressLifecycleGate()
+        XCTAssertTrue(gate.shouldEmit(.active))
+        XCTAssertTrue(gate.shouldEmit(.completed))
+        XCTAssertFalse(gate.shouldEmit(.completed))
+        XCTAssertTrue(gate.hasSeenNonterminal)
+        XCTAssertTrue(gate.hasEmittedTerminal)
+    }
+
+    func testCancellationWithoutObservedActivityIsSuppressed() {
+        var gate = ProgressLifecycleGate()
+        XCTAssertFalse(gate.shouldEmit(.cancelled))
+    }
 }

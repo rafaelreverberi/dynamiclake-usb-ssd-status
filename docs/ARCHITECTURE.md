@@ -46,6 +46,8 @@ Registers one public cross-process `Progress` subscriber per relevant volume. Pu
 
 The provider forwards optional values without substitution. Unit counts are treated as bytes only when byte throughput is present; this avoids labeling arbitrary Progress units as bytes.
 
+A newly published Progress object must be observed in a nonterminal state before its completion or cancellation is forwarded. This filters already-finished Finder preflight objects. Separately, the renderer only presents a terminal state when that same transfer previously crossed the 0.75-second Live Activity visibility threshold.
+
 ### FSEventsTransferProvider
 
 Uses per-volume file-level streams with `FileEvents`, `WatchRoot`, and `NoDefer`. It neither walks the tree nor totals file sizes. Meaningful write-related events produce one low-confidence indeterminate activity per volume. A 1.5 second quiet window ends the activity but is not rendered as semantic “transfer complete.”
