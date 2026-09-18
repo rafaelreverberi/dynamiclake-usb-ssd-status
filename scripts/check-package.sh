@@ -6,7 +6,7 @@ target="${1:-$repo_dir/TransferCenter.dynamiclakeplugin}"
 work_dir=""
 
 if [[ "$target" == *.zip ]]; then
-  if unzip -Z1 "$target" | rg -q '(^|/)(\.DS_Store|\._[^/]+|__MACOSX)(/|$)'; then
+  if unzip -Z1 "$target" | grep -E -q '(^|/)(\.DS_Store|\._[^/]+|__MACOSX)(/|$)'; then
     print -u2 "Archive contains Finder or AppleDouble metadata."
     exit 1
   fi
@@ -45,7 +45,7 @@ icon="$(jq -r .icon "$package/plugin.json")"
 [[ -x "$package/$executable" ]] || { print -u2 "Executable is missing or not executable: $executable"; exit 1; }
 [[ -f "$package/$icon" ]] || { print -u2 "Icon is missing: $icon"; exit 1; }
 [[ -f "$package/drive-transfer-symbol.png" ]] || { print -u2 "Inline drive artwork is missing."; exit 1; }
-file "$package/$executable" | rg -q 'Mach-O universal binary.*x86_64.*arm64|Mach-O universal binary.*arm64.*x86_64'
+file "$package/$executable" | grep -E -q 'Mach-O universal binary.*x86_64.*arm64|Mach-O universal binary.*arm64.*x86_64'
 
 width="$(sips -g pixelWidth "$package/$icon" | awk '/pixelWidth/ {print $2}')"
 height="$(sips -g pixelHeight "$package/$icon" | awk '/pixelHeight/ {print $2}')"
@@ -55,7 +55,7 @@ height="$(sips -g pixelHeight "$package/$icon" | awk '/pixelHeight/ {print $2}')
 (( $(stat -f %z "$package/drive-transfer-symbol.png") <= 49152 )) || { print -u2 "Inline drive artwork exceeds DynamicLake's 48 KB decoded-image limit."; exit 1; }
 [[ "$(sips -g hasAlpha "$package/drive-transfer-symbol.png" | awk '/hasAlpha/ {print $2}')" == "yes" ]] || { print -u2 "Inline drive artwork must have alpha transparency."; exit 1; }
 
-if find "$package" \( -name .DS_Store -o -name '._*' -o -name __MACOSX -o -name '*.swift' -o -name '*.dSYM' -o -name Package.swift \) | rg -q .; then
+if find "$package" \( -name .DS_Store -o -name '._*' -o -name __MACOSX -o -name '*.swift' -o -name '*.dSYM' -o -name Package.swift \) | grep -q .; then
   print -u2 "Package contains forbidden source/debug metadata."
   exit 1
 fi
