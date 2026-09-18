@@ -19,6 +19,7 @@ Transfer Center is a local, native Swift plugin. It correlates public macOS file
 - Event-driven volume mount/unmount handling and no idle directory crawling.
 - Brief, self-dismissing Sneak Peeks when an external drive connects or disconnects.
 - No persistent activity while idle.
+- Custom transparent silver drive artwork for drive and transfer activities instead of the macOS SF Symbol.
 - Local-only operation with no telemetry, analytics, accounts, or network service.
 
 ## Screenshots
@@ -53,7 +54,7 @@ swift build
 swift test
 swift build -c release --arch arm64 --arch x86_64
 ./scripts/package-plugin.sh
-./scripts/check-package.sh dist/TransferCenter-0.1.2.dynamiclakeplugin.zip
+./scripts/check-package.sh dist/TransferCenter-0.1.3.dynamiclakeplugin.zip
 ```
 
 The Release binary is universal (`arm64` and `x86_64`). No third-party runtime dependency is bundled.
@@ -144,11 +145,11 @@ No hardware scenario in `docs/TESTING.md` is marked passed unless it actually ra
 
 `scripts/build-release.sh` builds a universal Release executable, runs tests, packages the plugin, validates manifest/icon/executable/layout/size constraints, runs the wire smoke test, and prints SHA-256. The current checks enforce the documented Market limits supplied for this project: 7 MB ZIP, 20 MB unpacked, square PNG icon no larger than 1.5 MB.
 
-The archive is created at `dist/TransferCenter-0.1.2.dynamiclakeplugin.zip`. Releases are not automatically published.
+The archive is created at `dist/TransferCenter-0.1.3.dynamiclakeplugin.zip`. Releases are not automatically published.
 
 ## Icon
 
-`Assets/icon.png` is the generated development artwork: an external drive, transfer arrows, and progress arc on transparency. Replace it with final reviewed artwork before Market submission if desired.
+`Assets/icon.png` is the generated development plugin artwork. `Assets/drive-transfer-symbol.png` is the supplied drive design recreated on transparency and optimized to 96×96/4.8 KB for DynamicLake's inline-image component. Replace either with final reviewed artwork before Market submission if desired.
 
 ## License
 

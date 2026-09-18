@@ -163,7 +163,12 @@ final class DynamicLakeRenderingTests: XCTestCase {
         XCTAssertNotNil(surfaces["compactLiveActivity"])
         XCTAssertNil(surfaces["extraLiveActivity"], "The JSON protocol currently defines only compactLiveActivity and sneakPeek")
         let compact = try XCTUnwrap(surfaces["compactLiveActivity"] as? [String: Any])
+        let compactLeft = try XCTUnwrap(compact["leftSlot"] as? [String: Any])
         let compactRight = try XCTUnwrap(compact["rightSlot"] as? [String: Any])
+        XCTAssertEqual(compactLeft["source"] as? String, "inlineData")
+        XCTAssertEqual(compactLeft["mimeType"] as? String, "image/png")
+        let artwork = try XCTUnwrap(compactLeft["base64Data"] as? String)
+        XCTAssertLessThanOrEqual(try XCTUnwrap(Data(base64Encoded: artwork)).count, 48 * 1024)
         XCTAssertEqual(compactRight["type"] as? String, "progress")
         XCTAssertNil(compactRight["status"], "progress components do not have a status field")
         let sneak = try XCTUnwrap(surfaces["sneakPeek"] as? [String: Any])
@@ -213,6 +218,7 @@ final class DynamicLakeRenderingTests: XCTestCase {
             activityID: "transfer-center.volume-event",
             text: "Backup SSD disconnected",
             systemImage: "externaldrive.fill",
+            useDriveArtwork: true,
             rightSystemImage: "xmark",
             tint: "blue",
             rightTint: "gray",
@@ -223,7 +229,7 @@ final class DynamicLakeRenderingTests: XCTestCase {
         let compact = try XCTUnwrap(surfaces["compactLiveActivity"] as? [String: Any])
         let left = try XCTUnwrap(compact["leftSlot"] as? [String: Any])
         let right = try XCTUnwrap(compact["rightSlot"] as? [String: Any])
-        XCTAssertEqual(left["systemImage"] as? String, "externaldrive.fill")
+        XCTAssertEqual(left["source"] as? String, "inlineData")
         XCTAssertEqual(right["type"] as? String, "image")
         XCTAssertEqual(right["systemImage"] as? String, "xmark")
         XCTAssertEqual(right["tint"] as? String, "gray")

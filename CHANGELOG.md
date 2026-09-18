@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3 - 2026-09-18
+
+- Replaced the drive SF Symbol with custom transparent silver drive artwork derived from the supplied reference.
+- Added package validation for the inline artwork's alpha channel and DynamicLake 48 KB decoded-image limit.
+
 ## 0.1.2 - 2026-09-18
 
 - Standardized drive-related leading artwork on Apple's `externaldrive.fill` SF Symbol.

@@ -24,10 +24,11 @@ TransferCenter.dynamiclakeplugin/
 ├── plugin.json
 ├── transfer-center        # executable Mach-O
 ├── icon.png               # square PNG
+├── drive-transfer-symbol.png # 96 px transparent inline activity artwork
 └── PrivacyInfo.xcprivacy
 ```
 
-The Market archive preserves this package directory as the single archive root: `TransferCenter-0.1.2.dynamiclakeplugin.zip`.
+The Market archive preserves this package directory as the single archive root: `TransferCenter-0.1.3.dynamiclakeplugin.zip`.
 
 ## plugin.json
 
@@ -91,6 +92,7 @@ The current JSON API defines exactly those two surfaces. DynamicLake's native Sw
 Components used by current official examples:
 
 - `image`: `source: "sfSymbol"`, `systemImage`, optional `tint`
+- `image`: `source: "inlineData"`, `mimeType: "image/png"`, and base64 data for the 4.8 KB transparent drive artwork
 - `text`: `text`, `style` (`compact` or `marquee`), optional `tint`
 - `progress`: optional normalized `value` and optional `tint`; omitting `value` makes it indeterminate
 - `status`: `status` (`success`, `failed`, `inProgress`, `paused`, or `warning`) and optional `tint`

@@ -63,6 +63,7 @@ public final class DynamicLakeRenderer {
             activityID: "transfer-center.volume-event",
             text: details,
             systemImage: "externaldrive.fill",
+            useDriveArtwork: true,
             status: "success",
             tint: "blue",
             rightTint: "green"
@@ -74,6 +75,7 @@ public final class DynamicLakeRenderer {
             activityID: "transfer-center.volume-event",
             text: "\(volume.name) disconnected",
             systemImage: "externaldrive.fill",
+            useDriveArtwork: true,
             rightSystemImage: "xmark",
             status: "success",
             tint: "blue",
@@ -118,7 +120,7 @@ public final class DynamicLakeRenderer {
         if activeCount > 1 { centerParts.insert("\(activeCount) transfers", at: 0) }
 
         let compact: [String: Any] = [
-            "leftSlot": image(id: "transfer-drive", symbol: "externaldrive.fill", tint: "blue"),
+            "leftSlot": driveImage(id: "transfer-drive"),
             "rightSlot": progress(id: "transfer-progress-compact", value: transfer.fractionCompleted),
         ]
         return base(command: command, activityID: activityID, surfaces: [
@@ -158,7 +160,7 @@ public final class DynamicLakeRenderer {
             sneak["rightSlot"] = button(id: "transfer-eject", actionID: "eject", symbol: "eject.fill")
         }
         let compact: [String: Any] = [
-            "leftSlot": image(id: "transfer-result-compact", symbol: symbol, tint: tint),
+            "leftSlot": driveImage(id: "transfer-result-compact"),
             "rightSlot": status(id: "transfer-result-status", value: transfer.state == .completed ? "success" : "failed", tint: tint),
         ]
         return base(command: command, activityID: activityID, surfaces: [
@@ -171,6 +173,7 @@ public final class DynamicLakeRenderer {
         activityID: String,
         text value: String,
         systemImage: String,
+        useDriveArtwork: Bool = false,
         rightSystemImage: String? = nil,
         status statusValue: String = "success",
         tint: String = "blue",
@@ -184,13 +187,13 @@ public final class DynamicLakeRenderer {
             trailing = status(id: "peek-status", value: statusValue, tint: rightTint ?? tint)
         }
         let compact: [String: Any] = [
-            "leftSlot": image(id: "peek-icon", symbol: systemImage, tint: tint),
+            "leftSlot": useDriveArtwork ? driveImage(id: "peek-icon") : image(id: "peek-icon", symbol: systemImage, tint: tint),
             "rightSlot": trailing,
         ]
         return base(command: "create", activityID: activityID, surfaces: [
             "compactLiveActivity": compact,
             "sneakPeek": [
-                "leftSlot": image(id: "peek-detail-icon", symbol: systemImage, tint: tint),
+                "leftSlot": useDriveArtwork ? driveImage(id: "peek-detail-icon") : image(id: "peek-detail-icon", symbol: systemImage, tint: tint),
                 "center": text(id: "peek-detail", value: bounded(value), style: "marquee"),
             ],
         ], presentSneakPeekSeconds: supportsPresentSneakPeek ? 2 : nil)
@@ -240,6 +243,7 @@ public final class DynamicLakeRenderer {
         activityID: String,
         text: String,
         systemImage: String,
+        useDriveArtwork: Bool = false,
         rightSystemImage: String? = nil,
         status: String,
         tint: String,
@@ -249,6 +253,7 @@ public final class DynamicLakeRenderer {
             activityID: activityID,
             text: text,
             systemImage: systemImage,
+            useDriveArtwork: useDriveArtwork,
             rightSystemImage: rightSystemImage,
             status: status,
             tint: tint,
@@ -283,6 +288,35 @@ public final class DynamicLakeRenderer {
     private static func image(id: String, symbol: String, tint: String) -> [String: Any] {
         ["type": "image", "id": id, "source": "sfSymbol", "systemImage": symbol, "tint": tint]
     }
+
+    private static func driveImage(id: String) -> [String: Any] {
+        guard let base64Data = driveArtworkBase64 else {
+            return image(id: id, symbol: "externaldrive.fill", tint: "blue")
+        }
+        return [
+            "type": "image",
+            "id": id,
+            "source": "inlineData",
+            "mimeType": "image/png",
+            "base64Data": base64Data,
+        ]
+    }
+
+    private static let driveArtworkBase64: String? = {
+        let environment = ProcessInfo.processInfo.environment
+        var candidates: [URL] = []
+        if let packagePath = environment["DYNAMICLAKE_PLUGIN_PACKAGE"], !packagePath.isEmpty {
+            candidates.append(URL(fileURLWithPath: packagePath).appendingPathComponent("drive-transfer-symbol.png"))
+        }
+        candidates.append(URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            .appendingPathComponent("Assets/drive-transfer-symbol.png"))
+
+        for url in candidates {
+            guard let data = try? Data(contentsOf: url), !data.isEmpty, data.count <= 48 * 1024 else { continue }
+            return data.base64EncodedString()
+        }
+        return nil
+    }()
 
     private static func text(id: String, value: String, style: String) -> [String: Any] {
         ["type": "text", "id": id, "text": value, "style": style, "tint": "white"]
