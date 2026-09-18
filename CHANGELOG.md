@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 - 2026-09-18
+
+- Fixed removable drives incorrectly showing `0 KB free` when macOS reports zero only for the important-usage capacity estimate.
+- Use the filesystem's normal available-capacity value first and retain important-usage capacity as a fallback.
+
 ## 0.1.3 - 2026-09-18
 
 - Replaced the drive SF Symbol with custom transparent silver drive artwork derived from the supplied reference.

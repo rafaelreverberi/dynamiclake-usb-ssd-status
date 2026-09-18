@@ -25,6 +25,8 @@ NSWorkspace volume events
 
 `VolumeMonitor` uses `NSWorkspace` mount, will-unmount, and unmount notifications plus `URLResourceValues`. `DiskArbitration` contributes a public device-protocol hint so mounted disk images can be kept separate from real local external devices when the system exposes that distinction.
 
+Free space uses `volumeAvailableCapacity` first because removable FAT/exFAT volumes can report zero for `volumeAvailableCapacityForImportantUsage` even when ordinary filesystem space is available. The important-usage value remains a fallback when the raw volume capacity is unavailable.
+
 Classification does not assume every `/Volumes` path is USB:
 
 - `isInternal == true` → internal storage

@@ -90,6 +90,7 @@ enum VolumeMetadataReader {
         .volumeIsRemovableKey,
         .volumeIsEjectableKey,
         .volumeIsReadOnlyKey,
+        .volumeAvailableCapacityKey,
         .volumeAvailableCapacityForImportantUsageKey,
         .volumeTotalCapacityKey,
     ]
@@ -106,7 +107,10 @@ enum VolumeMetadataReader {
             isRemovable: values.volumeIsRemovable,
             isEjectable: values.volumeIsEjectable,
             isReadOnly: values.volumeIsReadOnly,
-            availableCapacity: values.volumeAvailableCapacityForImportantUsage,
+            availableCapacity: VolumeCapacityResolver.available(
+                raw: values.volumeAvailableCapacity,
+                importantUsage: values.volumeAvailableCapacityForImportantUsage
+            ),
             totalCapacity: values.volumeTotalCapacity.map(Int64.init),
             deviceProtocol: diskProtocol(for: url)
         )
@@ -117,5 +121,11 @@ enum VolumeMetadataReader {
               let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL),
               let description = DADiskCopyDescription(disk) as? [String: Any] else { return nil }
         return description[kDADiskDescriptionDeviceProtocolKey as String] as? String
+    }
+}
+
+enum VolumeCapacityResolver {
+    static func available(raw: Int?, importantUsage: Int64?) -> Int64? {
+        raw.map(Int64.init) ?? importantUsage
     }
 }

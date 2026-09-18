@@ -2,6 +2,20 @@ import XCTest
 @testable import TransferCore
 
 final class VolumeClassifierTests: XCTestCase {
+    func testRawAvailableCapacityWinsWhenImportantUsageReportsZero() {
+        XCTAssertEqual(
+            VolumeCapacityResolver.available(raw: 480_215_040, importantUsage: 0),
+            480_215_040
+        )
+    }
+
+    func testImportantUsageCapacityRemainsFallback() {
+        XCTAssertEqual(
+            VolumeCapacityResolver.available(raw: nil, importantUsage: 1_500_000_000),
+            1_500_000_000
+        )
+    }
+
     func testInternalDisk() {
         XCTAssertEqual(VolumeClassifier.classify(.init(mountURL: URL(fileURLWithPath: "/"), isInternal: true, isLocal: true)), .internalStorage)
     }

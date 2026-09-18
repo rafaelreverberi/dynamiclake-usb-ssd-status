@@ -23,7 +23,7 @@ private func installSignalHandlers(_ cleanup: @escaping () -> Void) {
 
 private func printVolumes(_ volumes: [Volume]) {
     for volume in volumes {
-        print("\(volume.name)\t\(volume.mountURL.path)\t\(volume.kind.rawValue)\tinternal=\(String(describing: volume.isInternal))\tlocal=\(String(describing: volume.isLocal))\tremovable=\(String(describing: volume.isRemovable))\tejectable=\(String(describing: volume.isEjectable))")
+        print("\(volume.name)\t\(volume.mountURL.path)\t\(volume.kind.rawValue)\tinternal=\(String(describing: volume.isInternal))\tlocal=\(String(describing: volume.isLocal))\tremovable=\(String(describing: volume.isRemovable))\tejectable=\(String(describing: volume.isEjectable))\tfree=\(TransferFormatters.bytes(volume.availableCapacity) ?? "unknown")\ttotal=\(TransferFormatters.bytes(volume.totalCapacity) ?? "unknown")")
     }
 }
 
