@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 - 2026-09-18
+
+- Fixed the center flashing `success` multiple times during multi-file copies. Sequential per-file Foundation Progress objects on the same volume now continue one logical transfer, so completion appears once at the end.
+- Replaced the address-based Progress transfer ID with a stable UUID per observed Progress object.
+- Fixed identical payloads being resent by excluding `requestID` from the renderer throttle signature.
+
 ## 0.1.6 - 2026-09-18
 
 - Show completed transfers and connected drives with a plain checkmark instead of the circled status badge in the notch.
